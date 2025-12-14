@@ -1,6 +1,6 @@
 import api from "@/lib/api";
 
-// Types for auth
+// Types
 export interface SignUpData {
   fullName: string;
   username: string;
@@ -38,51 +38,50 @@ export interface AuthResponse {
   success: boolean;
 }
 
-// Auth service functions
 export const authService = {
-  // Sign up / Register
+  // Register new user
   async signUp(data: SignUpData): Promise<AuthResponse> {
-    // Use FormData for file uploads (avatar, coverImage)
-    const formData = new FormData();
-    formData.append("fullName", data.fullName);
-    formData.append("username", data.username);
-    formData.append("email", data.email);
-    formData.append("password", data.password);
-    
-    if (data.avatar) {
-      formData.append("avatar", data.avatar);
-    }
-    if (data.coverImage) {
-      formData.append("coverImage", data.coverImage);
-    }
+    try {
+      const formData = new FormData();
+      formData.append("fullName", data.fullName);
+      formData.append("username", data.username);
+      formData.append("email", data.email);
+      formData.append("password", data.password);
+      
+      if (data.avatar) formData.append("avatar", data.avatar);
+      if (data.coverImage) formData.append("coverImage", data.coverImage);
 
-    const response = await api.post<AuthResponse>("/users/register", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+      const response = await api.post<AuthResponse>("/users/register", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    // Store access token
-    if (response.data.data?.accessToken) {
-      localStorage.setItem("accessToken", response.data.data.accessToken);
+      // Store token
+      if (response.data.data?.accessToken) {
+        localStorage.setItem("accessToken", response.data.data.accessToken);
+      }
+      return response.data;
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      throw new Error(err.response?.data?.message || "Registration failed");
     }
-
-    return response.data;
   },
 
-  // Sign in / Login
+  // Login user
   async signIn(data: SignInData): Promise<AuthResponse> {
-    const response = await api.post<AuthResponse>("/users/login", data);
-
-    // Store access token
-    if (response.data.data?.accessToken) {
-      localStorage.setItem("accessToken", response.data.data.accessToken);
+    try {
+      const response = await api.post<AuthResponse>("/users/login", data);
+      
+      if (response.data.data?.accessToken) {
+        localStorage.setItem("accessToken", response.data.data.accessToken);
+      }
+      return response.data;
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      throw new Error(err.response?.data?.message || "Login failed");
     }
-
-    return response.data;
   },
 
-  // Sign out / Logout
+  // Logout user
   async signOut(): Promise<void> {
     try {
       await api.post("/users/logout");
@@ -91,7 +90,7 @@ export const authService = {
     }
   },
 
-  // Get current user
+  // Get current user profile
   async getCurrentUser(): Promise<User | null> {
     try {
       const response = await api.get<{ data: User }>("/users/current-user");
@@ -101,32 +100,33 @@ export const authService = {
     }
   },
 
-  // Check if user is authenticated
-  isAuthenticated(): boolean {
-    if (typeof window === "undefined") return false;
-    return !!localStorage.getItem("accessToken");
-  },
-
   // Change password
   async changePassword(oldPassword: string, newPassword: string): Promise<void> {
-    await api.post("/users/change-password", { oldPassword, newPassword });
+    try {
+      await api.post("/users/change-password", { oldPassword, newPassword });
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      throw new Error(err.response?.data?.message || "Failed to change password");
+    }
   },
 
   // Update account details
   async updateAccount(data: { fullName?: string; email?: string }): Promise<User> {
-    const response = await api.patch<{ data: User }>("/users/update-account", data);
-    return response.data.data;
+    try {
+      const response = await api.patch<{ data: User }>("/users/update-account", data);
+      return response.data.data;
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      throw new Error(err.response?.data?.message || "Failed to update account");
+    }
   },
 
   // Update avatar
   async updateAvatar(avatar: File): Promise<User> {
     const formData = new FormData();
     formData.append("avatar", avatar);
-    
     const response = await api.patch<{ data: User }>("/users/avatar", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data.data;
   },
@@ -135,11 +135,8 @@ export const authService = {
   async updateCoverImage(coverImage: File): Promise<User> {
     const formData = new FormData();
     formData.append("coverImage", coverImage);
-    
     const response = await api.patch<{ data: User }>("/users/cover-image", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
     return response.data.data;
   },
