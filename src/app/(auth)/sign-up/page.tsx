@@ -1,12 +1,11 @@
 "use client";
-
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -79,17 +78,17 @@ export default function SignUpPage() {
   };
 
   const onSubmit = async (values: SignUpFormValues) => {
+    setError(null);
+    
+    if (!avatar) {
+      setError("Please upload an avatar");
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-      setError(null);
-
-      if (!avatar) {
-        setError("Please upload an avatar");
-        setIsLoading(false);
-        return;
-      }
-
-      await signUp({
+      const response = await signUp({
         fullName: values.fullName,
         username: values.username,
         email: values.email,
@@ -97,12 +96,15 @@ export default function SignUpPage() {
         avatar: avatar,
       });
 
-      router.push("/");
+      toast.success("Account created!", {
+        description: `Welcome, ${response.data.user.username}!`,
+      });
+
+      router.replace("/");
     } catch (err) {
-      const errorMessage =
-        (err as { response?: { data?: { message?: string } } })?.response?.data
-          ?.message || "Something went wrong";
-      setError(errorMessage);
+      const message = err instanceof Error ? err.message : "Registration failed";
+      setError(message);
+      toast.error(message);
     } finally {
       setIsLoading(false);
     }
@@ -110,24 +112,22 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden bg-neutral-950">
-      {/* YouTube-style video grid background */}
-      <div className="absolute inset-0 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 opacity-40">
-        {Array.from({ length: 48 }).map((_, i) => (
-          <div
-            key={i}
-            className="aspect-video bg-gradient-to-br from-red-900 to-neutral-800 rounded"
-            style={{
-              opacity: Math.random() * 0.5 + 0.3,
-            }}
-          />
-        ))}
-      </div>
+     
+      {/* YouTube background image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('/youtube-bg.jpg')",
+          opacity: 0.35,
+        }}
+      />
       
       {/* Red glow effect */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-red-600/20 rounded-full blur-3xl" />
-      
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/60" />
+       
+      {/* Dark overlay for better readability */}
+      <div className="absolute inset-0 bg-linear-to-b from-black/50 via-black/30 to-black/50" />
+     
       
       <Card className="w-full max-w-sm bg-neutral-900/95 border-red-900/30 relative z-10 shadow-2xl shadow-red-900/20">
         <CardHeader className="text-center pb-2">
@@ -279,8 +279,9 @@ export default function SignUpPage() {
                 )}
               />
 
+              {/* Error display */}
               {error && (
-                <p className="text-[#FF0000] text-sm text-center">{error}</p>
+                <p className="text-sm text-red-500 text-center">{error}</p>
               )}
 
               <Button
