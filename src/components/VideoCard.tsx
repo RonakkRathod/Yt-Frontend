@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { YouTubeVideo } from "@/services/youtube.service";
@@ -28,11 +28,6 @@ function formatTimeAgo(dateString: string): string {
 
 export function VideoCard({ video }: VideoCardProps) {
   const [isLoading, setIsLoading] = useState(true);
-
-  // Reset loading state when video changes
-  useEffect(() => {
-    setIsLoading(true);
-  }, [video.id]);
 
   return (
     <div className="flex flex-col gap-2 group">
