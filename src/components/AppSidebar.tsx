@@ -88,20 +88,20 @@ export function AppSidebar() {
     const isActive = pathname === item.href;
 
     return (
-      <SidebarMenuItem key={item.href} className="list-none">
-        <SidebarMenuButton
-          asChild
-          isActive={isActive}
-          className="px-3 py-2.5 h-auto hover:bg-secondary data-[active=true]:bg-secondary data-[active=true]:font-semibold group-data-[collapsible=icon]:justify-center"
-          tooltip={item.label}
+      <SidebarMenuItem key={item.href} className="list-none px-2">
+        <Link 
+          href={item.href} 
+          className={`flex items-center gap-5 px-3 py-2 rounded-xl transition-all duration-200 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-2 ${
+            isActive 
+              ? "bg-neutral-200 dark:bg-neutral-800" 
+              : "hover:bg-neutral-100 dark:hover:bg-neutral-800/60"
+          }`}
         >
-          <Link href={item.href} className="flex items-center gap-4 group-data-[collapsible=icon]:justify-center">
-            <Icon className="text-2xl text-muted-foreground group-data-[active=true]:text-foreground shrink-0" />
-            <span className="text-sm font-medium text-muted-foreground group-data-[active=true]:text-foreground group-data-[active=true]:font-semibold group-data-[collapsible=icon]:hidden">
-              {item.label}
-            </span>
-          </Link>
-        </SidebarMenuButton>
+          <Icon className={`text-[22px] shrink-0 ${isActive ? "text-foreground" : "text-foreground/80"}`} />
+          <span className={`text-sm group-data-[collapsible=icon]:hidden ${isActive ? "font-semibold text-foreground" : "font-medium text-foreground/80"}`}>
+            {item.label}
+          </span>
+        </Link>
       </SidebarMenuItem>
     );
   };
