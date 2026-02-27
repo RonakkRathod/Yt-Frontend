@@ -11,7 +11,33 @@ export interface YouTubeVideo {
   viewCount?: string;
 }
 
-async function fetchFromYouTube(endpoint: string, params: Record<string, any>) {
+// YouTube API response types
+interface YouTubeAPIVideoItem {
+  id: string;
+  snippet: {
+    title: string;
+    thumbnails: { medium: { url: string } };
+    channelTitle: string;
+    channelId: string;
+    publishedAt: string;
+  };
+  statistics: {
+    viewCount: string;
+  };
+}
+
+interface YouTubeAPISearchItem {
+  id: { videoId: string };
+  snippet: {
+    title: string;
+    thumbnails: { medium: { url: string } };
+    channelTitle: string;
+    channelId: string;
+    publishedAt: string;
+  };
+}
+
+async function fetchFromYouTube(endpoint: string, params: Record<string, string | number>) {
   if (!API_KEY) throw new Error("YouTube API key not found");
 
   const url = new URL(`${BASE_URL}/${endpoint}`);
@@ -32,7 +58,7 @@ export async function getPopularVideos(maxResults = 20): Promise<YouTubeVideo[]>
     maxResults,
   });
 
-  return data.items.map((item: any) => ({
+  return data.items.map((item: YouTubeAPIVideoItem) => ({
     id: item.id,
     title: item.snippet.title,
     thumbnail: item.snippet.thumbnails.medium.url,
@@ -51,7 +77,7 @@ export async function searchVideos(query: string, maxResults = 20): Promise<YouT
     maxResults,
   });
 
-  return data.items.map((item: any) => ({
+  return data.items.map((item: YouTubeAPISearchItem) => ({
     id: item.id.videoId,
     title: item.snippet.title,
     thumbnail: item.snippet.thumbnails.medium.url,
