@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -60,11 +60,6 @@ function getThumbnailUrl(thumbnail: string | { url: string }): string {
 export function UserVideoCard({ video, showChannel = true }: UserVideoCardProps) {
   const thumbnailUrl = getThumbnailUrl(video.thumbnail);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Reset loading state when video changes
-  useEffect(() => {
-    setIsLoading(true);
-  }, [video._id]);
 
   return (
     <div className="flex flex-col gap-2 group">
