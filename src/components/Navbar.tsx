@@ -1,14 +1,14 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { AiFillYoutube } from "react-icons/ai";
 import { FiSearch, FiUser, FiMoon, FiSun, FiMenu } from "react-icons/fi";
 import { HiOutlineVideoCamera } from "react-icons/hi";
-import { IoMdNotificationsOutline } from "react-icons/io";
+import { IoMdNotificationsOutline, IoMdMic } from "react-icons/io";
+import { IoCloseCircle } from "react-icons/io5";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { useSidebar } from "@/components/ui/sidebar";
 import { toast } from "sonner";
@@ -20,11 +20,8 @@ const Navbar = () => {
   const { toggleSidebar } = useSidebar();
   const [searchQuery, setSearchQuery] = useState("");
   const [mounted, setMounted] = useState(false);
-
-  React.useEffect(() => {
-    setMounted(true);
-  }, []);
-  
+  const [isFocused, setIsFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   React.useEffect(() => {
     setMounted(true);
@@ -35,6 +32,11 @@ const Navbar = () => {
     if (searchQuery.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
     }
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+    inputRef.current?.focus();
   };
 
   const toggleTheme = () => {
@@ -64,38 +66,90 @@ const Navbar = () => {
           >
             <FiMenu className="text-2xl text-foreground" />
           </Button>
-          <Link href="/" className="flex items-center gap-2 hover:bg-secondary/50 px-3 py-2 rounded-lg transition-colors">
+          <Link href="/" className="flex items-center gap-1 hover:bg-secondary/50 px-2 py-2 rounded-lg transition-colors">
             <AiFillYoutube className="text-red-600 text-4xl" />
-            <span className="text-xl font-bold text-foreground hidden sm:block tracking-tight">
+            <span className="text-xl font-semibold text-foreground hidden sm:block tracking-tighter">
               YouTube
             </span>
           </Link>
         </div>
 
         {/* Middle: Search Bar */}
-        <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-4">
-          <div className="flex items-center gap-0 max-w-150 mx-auto rounded-full overflow-hidden bg-secondary/40 hover:bg-secondary/60 focus-within:bg-secondary/80 transition-all duration-300 ease-in-out shadow-sm">
-            <div className="flex-1 flex items-center bg-transparent">
-              <Input
-                type="text"
-                placeholder="Search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="flex-1 border-0 outline-none bg-transparent px-5 h-10 text-foreground placeholder:text-muted-foreground/60 shadow-none"
-              />
-            </div>
-            <Button
+        <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-4 hidden sm:flex items-center justify-center gap-3">
+          <div className={`flex items-center flex-1 max-w-xl border rounded-full overflow-hidden transition-all duration-200 ${
+            isFocused 
+              ? "border-blue-500 shadow-[0_0_0_1px_rgba(59,130,246,0.5)]" 
+              : "border-border hover:border-border/80"
+          }`}>
+            {/* Search Icon (shows when focused) */}
+            {isFocused && (
+              <div className="pl-4 pr-2">
+                <FiSearch className="text-lg text-muted-foreground" />
+              </div>
+            )}
+            
+            {/* Input Field */}
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              className={`flex-1 bg-transparent h-10 text-foreground placeholder:text-muted-foreground outline-none text-base ${
+                isFocused ? "pl-0" : "pl-4"
+              } pr-2`}
+            />
+            
+            {/* Clear Button */}
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="pr-3 hover:opacity-70 transition-opacity"
+                title="Clear search"
+                aria-label="Clear search"
+              >
+                <IoCloseCircle className="text-xl text-muted-foreground" />
+              </button>
+            )}
+            
+            {/* Search Button */}
+            <button
               type="submit"
-              variant="ghost"
-              className="h-10 w-16 hover:bg-secondary/20 rounded-none transition-all duration-300"
+              className="h-10 px-5 bg-secondary hover:bg-secondary/80 border-l border-border transition-colors"
+              title="Search"
+              aria-label="Search"
             >
-              <FiSearch className="text-xl text-foreground/80" />
-            </Button>
+              <FiSearch className="text-xl text-foreground" />
+            </button>
           </div>
+          
+          {/* Microphone Button */}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="rounded-full bg-secondary hover:bg-secondary/80 h-10 w-10"
+            title="Search with your voice"
+          >
+            <IoMdMic className="text-xl text-foreground" />
+          </Button>
         </form>
 
+        {/* Mobile Search Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="sm:hidden rounded-full hover:bg-secondary"
+          onClick={() => router.push("/search")}
+        >
+          <FiSearch className="text-xl text-foreground" />
+        </Button>
+
         {/* Right: User Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           {/* Theme Toggle */}
           <Button
             variant="ghost"
