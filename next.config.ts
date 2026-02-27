@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   turbopack: {
-    root: __dirname,
+    root: import.meta.dirname,
   },
   images: {
     remotePatterns: [
