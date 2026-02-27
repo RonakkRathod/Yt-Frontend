@@ -18,5 +18,8 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
-  "registries": {}
+  "registries": {
+    "@limeplay": "https://limeplay.winoffrg.dev/r/{name}.json",
+    "@basecn": "https://basecn.dev/r/{name}.json"
+  }
 }
