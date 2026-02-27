@@ -113,9 +113,6 @@ export default function LikedVideosPage() {
     }
 
     // Fetch liked videos
-    setLoading(true);
-    setError(null);
-
     getLikedVideos()
       .then((data) => {
         setVideos(data);

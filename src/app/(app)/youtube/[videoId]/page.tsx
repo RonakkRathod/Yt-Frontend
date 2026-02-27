@@ -82,8 +82,15 @@ export default function YouTubeWatchPage() {
 
   const [suggestions, setSuggestions] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isDisliked, setIsDisliked] = useState(false);
+  // Compute like status from localStorage
+  const getLikeStatus = () => {
+    if (typeof window === "undefined" || !videoId) return { liked: false, disliked: false };
+    const likedVideos = JSON.parse(localStorage.getItem("ytLikedVideos") || "[]");
+    const dislikedVideos = JSON.parse(localStorage.getItem("ytDislikedVideos") || "[]");
+    return { liked: likedVideos.includes(videoId), disliked: dislikedVideos.includes(videoId) };
+  };
+  const [isLiked, setIsLiked] = useState(() => getLikeStatus().liked);
+  const [isDisliked, setIsDisliked] = useState(() => getLikeStatus().disliked);
 
   useEffect(() => {
     // Fetch suggested videos from YouTube API
@@ -92,16 +99,6 @@ export default function YouTubeWatchPage() {
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
-
-  // Load like status from localStorage for YouTube videos
-  useEffect(() => {
-    if (videoId) {
-      const likedVideos = JSON.parse(localStorage.getItem("ytLikedVideos") || "[]");
-      const dislikedVideos = JSON.parse(localStorage.getItem("ytDislikedVideos") || "[]");
-      setIsLiked(likedVideos.includes(videoId));
-      setIsDisliked(dislikedVideos.includes(videoId));
-    }
-  }, [videoId]);
 
   const handleLike = () => {
     const likedVideos = JSON.parse(localStorage.getItem("ytLikedVideos") || "[]");

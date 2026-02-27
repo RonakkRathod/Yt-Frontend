@@ -173,9 +173,6 @@ export default function SubscriptionsPage() {
     }
 
     // Fetch subscribed channels
-    setLoading(true);
-    setError(null);
-
     getSubscribedChannels(user._id)
       .then((data) => {
         setChannels(data);

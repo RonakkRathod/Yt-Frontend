@@ -106,7 +106,6 @@ export default function StudioPage() {
   useEffect(() => {
     if (!user?._id) return;
 
-    setLoading(true);
     getUserVideos(user._id)
       .then(setVideos)
       .catch((err) => {

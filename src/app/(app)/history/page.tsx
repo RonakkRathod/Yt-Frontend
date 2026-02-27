@@ -124,7 +124,6 @@ export default function HistoryPage() {
       return;
     }
 
-    setLoading(true);
     getWatchHistory()
       .then((data) => {
         setVideos(data);
